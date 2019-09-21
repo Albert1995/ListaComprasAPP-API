@@ -1,9 +1,15 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 const cors = require('cors');
 const firebaseAdmin = require('firebase-admin');
 const serviceAccount = require("./firebase.json");
+const uuid = require('uuid');
 const itemsCollection = 'items';
+const categoriasCollection = 'Categorias';
+const subCategoriasCollection = 'SubCategorias';
+
+app.use(bodyParser.json());
 
 var firestore;
 
@@ -21,6 +27,98 @@ function initializeFirebase() {
 
 app.get('/', function(req, res) {
     res.send('Hello World');
+});
+
+app.get('/categorias', function(req, res) {
+    var lista = [];
+    firestore.collection(categoriasCollection).get().then(function(snapshot) {
+        for (var d in snapshot.docs) {
+            var id = snapshot.docs[d].id;
+            var doc = snapshot.docs[d].data();
+            lista.push({
+                id: id,
+                nome: doc.nome,
+                idUsuario: doc.idUsuario
+            });
+        }
+        res.json(lista);
+    })
+});
+
+app.post('/novaCategoria', function(req, res) {
+    var categoria = req.body;
+    firestore.collection(categoriasCollection).doc(categoria.id).set(categoria)
+    .then(function() {
+        res.send('Ok');
+    }).catch(function(e) {
+        console.error(e);
+        res.send('Erro');
+    });
+});
+
+app.delete('/excluirCategoria/:id', function(req, res) {
+    firestore.collection(categoriasCollection).doc(req.params.id).delete().then(function() {
+        res.send('OK');
+    }).catch(function(e) {
+        console.error(e);
+        res.send('Erro');
+    });
+});
+
+app.put('/atualizarCategoria/:id', function(req, res) {
+    firestore.collection(categoriasCollection).doc(req.params.id).update(req.body)
+    .then(function() {
+        res.send('OK');
+    }).catch(function(e) {
+        console.error(e);
+        res.send('Falha');
+    })
+});
+
+app.get('/subCategorias/:id', function(req, res) {
+    var lista = [];
+    firestore.collection(subCategoriasCollection).where('categoria', '==', req.params.id).get().then(function(snapshot) {
+        for (var d in snapshot.docs) {
+            var id = snapshot.docs[d].id;
+            var doc = snapshot.docs[d].data();
+            lista.push({
+                id: id,
+                categoria: doc.categoria,
+                descricao: doc.descricao
+            });
+        }
+        res.json(lista);
+    })
+});
+
+app.post('/novaSubCategoria', function(req, res) {
+    var subCategoria = req.body;
+    firestore.collection(subCategoriasCollection).doc(subCategoria.id).set(subCategoria)
+    .then(function() {
+        res.send('Ok');
+    }).catch(function(e) {
+        console.error(e);
+        res.send('Erro');
+    });
+});
+
+app.delete('/excluirSubCategoria/:id', function(req, res) {
+    firestore.collection(subCategoriasCollection).doc(req.params.id).delete().then(function() {
+        res.send('OK');
+    }).catch(function(e) {
+        console.error(e);
+        res.send('Erro');
+    });
+});
+
+app.put('/atualizarSubCategoria/:id', function(req, res) {
+    firestore.collection(subCategoriasCollection).doc(req.params.id).update(req.body)
+    .then(function() {
+        res.send('OK');
+    }).catch(function(e) {
+        console.error(e);
+        res.send('Falha');
+    })
 });
 
 /**
