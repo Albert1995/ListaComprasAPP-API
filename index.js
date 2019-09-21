@@ -12,7 +12,7 @@ const jsonOK = {code: 0, msg: 'OK'};
 
 app.use(bodyParser.json());
 
-var firestore;
+var firestore, auth;
 
 /**
  * Inicializa uma conexao com o Firebase
@@ -24,6 +24,7 @@ function initializeFirebase() {
     });
 
     firestore = firebaseAdmin.firestore();
+    auth = firebaseAdmin.auth();
 }
 
 app.get('/', function(req, res) {
