@@ -1,10 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
+const firebase = require('firebase');
+require('firebase/auth');
 const cors = require('cors');
 const firebaseAdmin = require('firebase-admin');
 const serviceAccount = require("./firebase.json");
 const uuid = require('uuid');
+const app = express();
+
 const itemsCollection = 'items';
 const categoriasCollection = 'Categorias';
 const subCategoriasCollection = 'SubCategorias';
@@ -12,21 +15,52 @@ const subCategoriasCollection = 'SubCategorias';
 app.use(bodyParser.json());
 
 var firestore;
+var defaultApp;
+var defaultAuth;
 
 /**
  * Inicializa uma conexao com o Firebase
  */
 function initializeFirebase() {
-    firebaseAdmin.initializeApp({
+    defaultApp = firebaseAdmin.initializeApp({
         credential: firebaseAdmin.credential.cert(serviceAccount),
         databaseURL: "https://listacomprasapp-b51d0.firebaseio.com"
     });
-
+    
     firestore = firebaseAdmin.firestore();
+    defaultAuth = defaultApp.auth();
 }
 
 app.get('/', function(req, res) {
     res.send('Hello World');
+});
+
+app.post('/criarUsuario',function(req, res) {
+    var usuario = req.body;
+    firebaseAdmin.auth().createUser({
+        email: usuario.email,
+        password: usuario.senha
+      })
+        .then(function(userRecord) {
+          // See the UserRecord reference doc for the contents of userRecord.
+          console.log('Successfully created new user:', userRecord.uid);
+          res.json(userRecord.uid);
+        })
+        .catch(function(error) {
+          console.log('Error creating new user:', error);
+        });
+});
+
+app.post('/login', function(req, res){
+    var usuario = req.body;
+    firebaseAdmin.auth().getUserByEmail(usuario.email)
+        .then(function(userRecord) {
+            // See the UserRecord reference doc for the contents of userRecord.
+            console.log('Successfully fetched user data:', userRecord.toJSON());
+        })
+        .catch(function(error) {
+        console.log('Error fetching user data:', error);
+        });
 });
 
 app.get('/categorias', function(req, res) {
