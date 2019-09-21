@@ -8,6 +8,7 @@ const uuid = require('uuid');
 const itemsCollection = 'items';
 const categoriasCollection = 'Categorias';
 const subCategoriasCollection = 'SubCategorias';
+const jsonOK = {code: 0, msg: 'OK'};
 
 app.use(bodyParser.json());
 
@@ -49,7 +50,7 @@ app.post('/novaCategoria', function(req, res) {
     var categoria = req.body;
     firestore.collection(categoriasCollection).doc(categoria.id).set(categoria)
     .then(function() {
-        res.send('Ok');
+        res.json(jsonOK);
     }).catch(function(e) {
         console.error(e);
         res.send('Erro');
@@ -58,7 +59,7 @@ app.post('/novaCategoria', function(req, res) {
 
 app.delete('/excluirCategoria/:id', function(req, res) {
     firestore.collection(categoriasCollection).doc(req.params.id).delete().then(function() {
-        res.send('OK');
+        res.json(jsonOK);
     }).catch(function(e) {
         console.error(e);
         res.send('Erro');
@@ -68,7 +69,7 @@ app.delete('/excluirCategoria/:id', function(req, res) {
 app.put('/atualizarCategoria/:id', function(req, res) {
     firestore.collection(categoriasCollection).doc(req.params.id).update(req.body)
     .then(function() {
-        res.send('OK');
+        res.json(jsonOK);
     }).catch(function(e) {
         console.error(e);
         res.send('Falha');
@@ -95,7 +96,7 @@ app.post('/novaSubCategoria', function(req, res) {
     var subCategoria = req.body;
     firestore.collection(subCategoriasCollection).doc(subCategoria.id).set(subCategoria)
     .then(function() {
-        res.send('Ok');
+        res.json(jsonOK);
     }).catch(function(e) {
         console.error(e);
         res.send('Erro');
@@ -104,7 +105,7 @@ app.post('/novaSubCategoria', function(req, res) {
 
 app.delete('/excluirSubCategoria/:id', function(req, res) {
     firestore.collection(subCategoriasCollection).doc(req.params.id).delete().then(function() {
-        res.send('OK');
+        res.json(jsonOK);
     }).catch(function(e) {
         console.error(e);
         res.send('Erro');
@@ -114,7 +115,7 @@ app.delete('/excluirSubCategoria/:id', function(req, res) {
 app.put('/atualizarSubCategoria/:id', function(req, res) {
     firestore.collection(subCategoriasCollection).doc(req.params.id).update(req.body)
     .then(function() {
-        res.send('OK');
+        res.json(jsonOK);
     }).catch(function(e) {
         console.error(e);
         res.send('Falha');
