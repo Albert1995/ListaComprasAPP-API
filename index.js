@@ -54,6 +54,7 @@ app.post('/login', function(req, res){
     var usuario = req.body;
     firebaseAdmin.auth().getUserByEmail(usuario.email)
         .then(function(userRecord) {
+            res.send(userRecord.toJSON());
             // See the UserRecord reference doc for the contents of userRecord.
             console.log('Successfully fetched user data:', userRecord.toJSON());
         })
