@@ -1,4 +1,5 @@
 const auth = require('../app/auth');
+const uuid = require('uuid/v1');
 
 module.exports = function(app) {
 
@@ -6,9 +7,27 @@ module.exports = function(app) {
     var firestore = require('../config/firebase-config').firestore();
     var categoriasCollection = "Categorias";
 
+    app.post(urlBase, auth.validate, function(req, res) {
+        var categoria = req.body;
+        categoria.id = uuid();
+        categoria.idUsuario = req.user;
+
+        firestore.collection(categoriasCollection).doc(categoria.id).set(categoria)
+        .then(function() {
+            res.json(categoria);
+        }).catch(function(err) {
+            res.send({
+                code: -10,
+                msg: 'Não foi possível criar a categoria',
+                trace: err
+            })
+        });
+    });
+
+
     app.get(urlBase, auth.validate, function(req, res) {
         var lista = [];
-        firestore.collection(categoriasCollection).get().then(function(snapshot) {
+        firestore.collection(categoriasCollection).where('idUsuario', '==', req.user).get().then(function(snapshot) {
             for (var d in snapshot.docs) {
                 var id = snapshot.docs[d].id;
                 var doc = snapshot.docs[d].data();
@@ -22,34 +41,66 @@ module.exports = function(app) {
         });
     });
 
-    app.post(urlBase, function(req, res) {
-        var categoria = req.body;
-
-        firestore.collection(categoriasCollection).doc(categoria.id).set(categoria)
-        .then(function() {
-            res.json(jsonOK);
-        }).catch(function(e) {
-            console.error(e);
-            res.send('Erro');
+    app.get(urlBase + '/:id', auth.validate, function(req, res) {
+        firestore.collection(categoriasCollection).doc(req.params.id).get().then(function(doc) {
+            if (!doc.exists) {
+                res.send('Categoria não encontrada');
+            } else {
+                var c = doc.data();
+                if (c.idUsuario == req.user)
+                    res.send({
+                        id: c.id,
+                        nome: c.nome,
+                        idUsuario: c.idUsuario
+                    });
+                else 
+                    res.send('Categoria não encontrada');
+            }
         });
     });
 
-    app.delete(urlBase + '/:id', function(req, res) {
-        firestore.collection(categoriasCollection).doc(req.params.id).delete().then(function() {
-            res.json(jsonOK);
-        }).catch(function(e) {
-            console.error(e);
-            res.send('Erro');
+    app.delete(urlBase + '/:id', auth.validate, function(req, res) {
+        
+        firestore.collection(categoriasCollection).doc(req.params.id).get().then(function(doc) {
+            if (doc.data().idUsuario = req.user) {
+                return firestore.collection(categoriasCollection).doc(req.params.id).delete();
+            } else {
+                res.send({
+                    code: -21,
+                    msg: 'Você não pode excluir categorias que não pertencem a seu usuário.'
+                })
+            }
+        }).then(function() {
+            res.json({ code: 0, msg: 'Deleted' });
+        }).catch(function(err) {
+            res.send({
+                code: -20,
+                msg: 'Não foi possível excluir a categoria',
+                trace: err
+            })
         });
+        
+        
     });
 
-    app.put(urlBase + '/:id', function(req, res) {
-        firestore.collection(categoriasCollection).doc(req.params.id).update(req.body)
-        .then(function() {
-            res.json(jsonOK);
-        }).catch(function(e) {
-            console.error(e);
-            res.send('Falha');
+    app.put(urlBase + '/:id', auth.validate, function(req, res) {
+        firestore.collection(categoriasCollection).doc(req.params.id).get().then(function(doc) {
+            if (doc.data().idUsuario = req.user) {
+                return firestore.collection(categoriasCollection).doc(req.params.id).update(req.body).then(function() {
+                    res.json(req.body);
+                }).catch(function(err) {
+                    res.send({
+                        code: -30,
+                        msg: 'Não foi possível alterar a categoria',
+                        trace: err
+                    })
+                })
+            } else {
+                res.send({
+                    code: -31,
+                    msg: 'Você não pode alterar categorias que não pertencem a seu usuário.'
+                })
+            }
         })
     });
 }
