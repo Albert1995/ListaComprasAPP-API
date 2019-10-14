@@ -10,7 +10,7 @@ module.exports = function(app) {
     app.post(urlBase, auth.validate, function(req, res) {
         var categoria = req.body;
         categoria.id = uuid();
-        categoria.idUsuario = req.user;
+        categoria.idUsuario = req.idUsuario;
 
         firestore.collection(categoriasCollection).doc(categoria.id).set(categoria)
         .then(function() {
@@ -27,7 +27,7 @@ module.exports = function(app) {
 
     app.get(urlBase, auth.validate, function(req, res) {
         var lista = [];
-        firestore.collection(categoriasCollection).where('idUsuario', '==', req.user).get().then(function(snapshot) {
+        firestore.collection(categoriasCollection).where('idUsuario', '==', req.idUsuario).get().then(function(snapshot) {
             for (var d in snapshot.docs) {
                 var id = snapshot.docs[d].id;
                 var doc = snapshot.docs[d].data();
