@@ -10,7 +10,7 @@ module.exports = function(app) {
     app.post(urlBase, auth.validate, function(req, res) {
         var categoria = req.body;
         categoria.id = uuid();
-        categoria.idUsuario = req.idUsuario;
+        //categoria.idUsuario = req.idUsuario;
 
         firestore.collection(categoriasCollection).doc(categoria.id).set(categoria)
         .then(function() {
