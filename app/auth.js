@@ -4,8 +4,8 @@ const crypto = require('crypto');
 
 module.exports.signin = async function(user) {
     var db = postgres.getClient();
-    //var result = { auth: false, token: null };
-    var result = { valid: true, code: 0, msg: "OK" };
+    var result = { auth: false, token: null, uuid: "" };
+    //var result = { valid: true, code: 0, msg: "OK" };
 
     await db.connect();
     var res = await db.query('SELECT uid, email, password, salt FROM USERS WHERE EMAIL = $1::text', [user.email]);
@@ -13,6 +13,7 @@ module.exports.signin = async function(user) {
         if (res.rows[0].password === crypto.createHmac('sha256', res.rows[0].salt).update(user.password).digest('hex')) {
             result.valid = true;
             result.msg = jwt.sign({ id: res.rows[0].uid }, process.env.SECRET);
+            result.uuid = res.rows[0].uid;
         }
     }
     await db.end();
