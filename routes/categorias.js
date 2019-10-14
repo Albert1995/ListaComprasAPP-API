@@ -10,11 +10,14 @@ module.exports = function(app) {
     app.post(urlBase, auth.validate, function(req, res) {
         var categoria = req.body;
         categoria.id = uuid();
-        //categoria.idUsuario = req.idUsuario;
 
         firestore.collection(categoriasCollection).doc(categoria.id).set(categoria)
         .then(function() {
-            res.json(categoria);
+            res.send({
+                valid: true,
+                code: 0,
+                msg: 'Salvo com sucesso!'
+            })
         }).catch(function(err) {
             res.send({
                 code: -10,
