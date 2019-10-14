@@ -25,7 +25,7 @@ module.exports = function(app) {
     });
 
 
-    app.get(urlBase + '/:uuid', auth.validate, function(req, res) {
+    app.get(urlBase + '/getAll/:uuid', auth.validate, function(req, res) {
         var lista = [];
         firestore.collection(categoriasCollection).where('idUsuario', '==', req.params.uuid).get().then(function(snapshot) {
             for (var d in snapshot.docs) {
