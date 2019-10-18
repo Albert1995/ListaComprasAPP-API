@@ -25,21 +25,32 @@ module.exports = function(app) {
 
     app.post(urlBase, auth.validate, function(req, res) {
         var subCategoria = req.body;
+
         firestore.collection(subCategoriasCollection).doc(subCategoria.id).set(subCategoria)
         .then(function() {
-            res.json(jsonOK);
-        }).catch(function(e) {
-            console.error(e);
-            res.send('Erro');
+            res.send({
+                valid: true,
+                code: 0,
+                msg: 'Salvo com sucesso!'
+            })
+        }).catch(function(err) {
+            res.send({
+                code: -10,
+                msg: 'Não foi possível criar a subCategoria',
+                trace: err
+            })
         });
     });
 
     app.delete(urlBase + '/:id', auth.validate, function(req, res) {
         firestore.collection(subCategoriasCollection).doc(req.params.id).delete().then(function() {
-            res.json(jsonOK);
-        }).catch(function(e) {
-            console.error(e);
-            res.send('Erro');
+            res.json({ code: 0, msg: 'Deleted' });
+        }).catch(function(err) {
+            res.send({
+                code: -20,
+                msg: 'Não foi possível excluir a subCategoria',
+                trace: err
+            })
         });
     });
 
