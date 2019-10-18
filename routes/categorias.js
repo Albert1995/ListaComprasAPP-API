@@ -62,7 +62,7 @@ module.exports = function(app) {
         });
     });
 
-    app.delete(urlBase + '/:id/:idUsuario', auth.validate, function(req, res) {
+    app.delete(urlBase + '/excluirCategoria/:id/:idUsuario', auth.validate, function(req, res) {
         
         firestore.collection(categoriasCollection).doc(req.params.id).get().then(function(doc) {
             if (doc.data().idUsuario = req.params.idUsuario) {
