@@ -67,7 +67,6 @@ module.exports = function(app) {
         firestore.collection(categoriasCollection).doc(req.params.id).get().then(function(doc) {
             if (doc.data().idUsuario = req.params.idUsuario) {
                 return firestore.collection(categoriasCollection).doc(req.params.id).delete();
-                //firestore.collection(subCategoriasCollection).where('categoria', '==', req.params.id).delete();
             } else {
                 res.send({
                     code: -21,
